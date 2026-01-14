@@ -99,7 +99,12 @@
   <button onclick="send()">Find Job Role</button>
 </div>
 
-<script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    const supabase = supabase.createClient(
+  "https://supabase.com/dashboard/project/oohngpymjdvqorntzimz",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vaG5ncHltamR2cW9ybnR6aW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDE0MzAsImV4cCI6MjA4Mzk3NzQzMH0.Avws5jf0m98zie0EcC62KZeXr8jiZrCsLg2gN7uYG7c"
+);
+
 function send() {
   const skillsInput = document.getElementById("skills").value.toLowerCase();
   const experienceInput = document.getElementById("experience").value;
@@ -163,6 +168,15 @@ function send() {
 
   document.getElementById("skills").value = "";
   document.getElementById("experience").value = "";
+
+  supabase.from("responses").insert([
+      {
+        skills: skillsInput,
+        experience: experienceInput,
+        role: role,
+        confidence: confidence
+      }
+    ]);
 }
 </script>
 
