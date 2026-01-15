@@ -182,3 +182,188 @@ function send() {
 
 </body>
 </html>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TalentScout Chatbot</title>
+
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #F8FAFC;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chatbox {
+      width: 380px;
+      background: white;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      background: #2563EB;
+      color: white;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .chat-header span {
+      display: block;
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      margin: 12px 0;
+    }
+
+    .bot, .user {
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin: 8px 0;
+      max-width: 80%;
+    }
+
+    .bot {
+      background: #E0E7FF;
+      align-self: flex-start;
+    }
+
+    .user {
+      background: #DBEAFE;
+      align-self: flex-end;
+      text-align: right;
+    }
+
+    input, button {
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid #CBD5E1;
+      width: 100%;
+    }
+
+    button {
+      background: #22C55E;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="chatbox">
+  <div class="chat-header">
+    🤖 TalentScout
+    <span>Your career companion</span>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="bot">
+      Hi! 👋 I’m TalentScout.<br>
+      Tell me your skills and experience.
+    </div>
+  </div>
+
+  <input id="skills" placeholder="Skills (e.g. Python, HTML)" />
+  <input id="experience" placeholder="Experience (e.g. 1–2 years)" />
+  <button onclick="send()">Find Job Role</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    const supabase = supabase.createClient(
+  "https://supabase.com/dashboard/project/oohngpymjdvqorntzimz",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vaG5ncHltamR2cW9ybnR6aW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDE0MzAsImV4cCI6MjA4Mzk3NzQzMH0.Avws5jf0m98zie0EcC62KZeXr8jiZrCsLg2gN7uYG7c"
+);
+
+function send() {
+  const skillsInput = document.getElementById("skills").value.toLowerCase();
+  const experienceInput = document.getElementById("experience").value;
+  const messages = document.getElementById("messages");
+
+  messages.innerHTML += `<div class="user">${skillsInput}</div>`;
+
+  let role = "General IT Role";
+  let confidence = 60;
+  let level = "Fresher";
+
+  // Job role mapping
+  if (skillsInput.includes("python") || skillsInput.includes("sql")) {
+    role = "Data Analyst";
+    confidence = 75;
+  } else if (skillsInput.includes("html") || skillsInput.includes("javascript")) {
+    role = "Web Developer";
+    confidence = 80;
+  } else if (skillsInput.includes("figma")) {
+    role = "UI/UX Designer";
+    confidence = 78;
+  } else if (skillsInput.includes("seo")) {
+    role = "Digital Marketer";
+    confidence = 70;
+  } else if (skillsInput.includes("java")) {
+    role = "Software Developer";
+    confidence = 82;
+  }
+
+  // Experience-based adjustment
+  const years = parseFloat(experienceInput);
+
+  if (!isNaN(years)) {
+    if (years < 1) {
+      level = "Fresher";
+    } else if (years <= 3) {
+      level = "Junior";
+      confidence += 5;
+    } else if (years <= 6) {
+      level = "Mid-level";
+      confidence += 10;
+    } else {
+      level = "Senior";
+      confidence += 15;
+    }
+  }
+
+  if (confidence > 95) confidence = 95;
+
+  const reply = `
+🎯 <b>Recommended Role:</b> ${role}<br>
+📌 <b>Experience Level:</b> ${level}<br>
+📊 <b>Match Confidence:</b> ${confidence}%<br><br>
+💡 <i>Tip:</i> Strengthen your profile with real-world projects and certifications.
+  `;
+
+  setTimeout(() => {
+    messages.innerHTML += `<div class="bot">${reply}</div>`;
+    messages.scrollTop = messages.scrollHeight;
+  }, 600);
+
+  document.getElementById("skills").value = "";
+  document.getElementById("experience").value = "";
+
+  supabase.from("responses").insert([
+      {
+        skills: skillsInput,
+        experience: experienceInput,
+        role: role,
+        confidence: confidence
+      }
+    ]);
+}
+</script>
+
+</body>
+</html>
