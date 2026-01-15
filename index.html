@@ -289,81 +289,58 @@ function send() {
   "https://supabase.com/dashboard/project/oohngpymjdvqorntzimz",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vaG5ncHltamR2cW9ybnR6aW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDE0MzAsImV4cCI6MjA4Mzk3NzQzMH0.Avws5jf0m98zie0EcC62KZeXr8jiZrCsLg2gN7uYG7c"
 );
-
-function send() {
-  const skillsInput = document.getElementById("skills").value.toLowerCase();
-  const experienceInput = document.getElementById("experience").value;
+</script>
+<script>
+async function send() {
+  const skills = document.getElementById("skills").value.toLowerCase();
+  const experience = document.getElementById("experience").value;
   const messages = document.getElementById("messages");
 
-  messages.innerHTML += `<div class="user">${skillsInput}</div>`;
+  messages.innerHTML += `<div class="user">${skills}</div>`;
 
   let role = "General IT Role";
-  let confidence = 60;
-  let level = "Fresher";
 
-  // Job role mapping
-  if (skillsInput.includes("python") || skillsInput.includes("sql")) {
+  if (skills.includes("python") || skills.includes("sql")) {
     role = "Data Analyst";
-    confidence = 75;
-  } else if (skillsInput.includes("html") || skillsInput.includes("javascript")) {
+  } else if (skills.includes("html") || skills.includes("javascript")) {
     role = "Web Developer";
-    confidence = 80;
-  } else if (skillsInput.includes("figma")) {
-    role = "UI/UX Designer";
-    confidence = 78;
-  } else if (skillsInput.includes("seo")) {
+  } else if (skills.includes("figma")) {
+    role = "Graphic Designer";
+  } else if (skills.includes("seo")) {
     role = "Digital Marketer";
-    confidence = 70;
-  } else if (skillsInput.includes("java")) {
-    role = "Software Developer";
-    confidence = 82;
+  } else if (skills.includes("java")) {
+    role = "Mobile App Developer";
   }
 
-  // Experience-based adjustment
-  const years = parseFloat(experienceInput);
+  // 🔴 INSERT INTO SUPABASE
+  const { data, error } = await supabase
+  .from("responses")
+  .insert({
+    skills,
+    experience,
+    role
+  })
+  .select();
 
-  if (!isNaN(years)) {
-    if (years < 1) {
-      level = "Fresher";
-    } else if (years <= 3) {
-      level = "Junior";
-      confidence += 5;
-    } else if (years <= 6) {
-      level = "Mid-level";
-      confidence += 10;
-    } else {
-      level = "Senior";
-      confidence += 15;
-    }
+console.log("Insert result:", data);
+console.log("Insert error:", error);
+
+  if (error) {
+    console.error("Supabase insert error:", error);
   }
-
-  if (confidence > 95) confidence = 95;
 
   const reply = `
-🎯 <b>Recommended Role:</b> ${role}<br>
-📌 <b>Experience Level:</b> ${level}<br>
-📊 <b>Match Confidence:</b> ${confidence}%<br><br>
-💡 <i>Tip:</i> Strengthen your profile with real-world projects and certifications.
+🎯 Recommended Role: ${role}<br>
+📌 Experience: ${experience}<br><br>
+This role aligns well with your skills. Keep learning! 🚀
   `;
 
-  setTimeout(() => {
-    messages.innerHTML += `<div class="bot">${reply}</div>`;
-    messages.scrollTop = messages.scrollHeight;
-  }, 600);
+  messages.innerHTML += `<div class="bot">${reply}</div>`;
 
   document.getElementById("skills").value = "";
   document.getElementById("experience").value = "";
-
-  supabase.from("responses").insert([
-      {
-        skills: skillsInput,
-        experience: experienceInput,
-        role: role,
-        confidence: confidence
-      }
-    ]);
+  messages.scrollTop = messages.scrollHeight;
 }
 </script>
-
 </body>
 </html>
